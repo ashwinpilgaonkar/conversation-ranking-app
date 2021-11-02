@@ -1,6 +1,5 @@
-import 'package:fanchat_app/all_logins.dart';
-import 'package:fanchat_app/auth_class.dart';
-import 'package:fanchat_app/peer_info.dart';
+import 'package:conversation_ranking_app/login_page.dart';
+import 'package:conversation_ranking_app/peer_info.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,10 +12,12 @@ class ChatScreen extends StatefulWidget {
     Key? key,
     required this.userId,
     required this.peerId,
+    required this.docId,
   }) : super(key: key);
 
   final String peerId;
   final String userId;
+  final String docId;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -24,12 +25,9 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   String? documentId;
-
-  String? _message;
-
   List<dynamic>? messageList;
 
-  double _rating = 1.0;
+  double _rating = 0.0;
 
   var format = DateFormat("d/M/y hh:mm a");
   var userName = "userName";
@@ -40,41 +38,31 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String? _peerIdToBeSentToUserInfoScreen;
 
-  static SnackBar customSnackBar({required String content}) {
-    return SnackBar(
-      backgroundColor: Colors.black,
-      content: Text(
-        content,
-        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
 
-    print("total" + widget.userId + widget.peerId);
+    print("total " + widget.userId + " " + widget.peerId);
 
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => AllLogins()));
+            context, MaterialPageRoute(builder: (context) => LoginPage()));
       }
     });
 
     // get user's firstName and lastName
     FirebaseFirestore.instance
         .collection('users')
-        .doc(widget.peerId)
+        .doc(widget.docId)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
-        print('Document data: ${data['firstName']}');
+        print('Document data: ${data['first_name']}');
         setState(() {
-          userName = data['firstName'] + " " + data['lastName'];
+          userName = data['first_name'] + " " + data['last_name'];
           _peerIdToBeSentToUserInfoScreen = widget.peerId;
         });
       } else {
@@ -113,7 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Row(children: <Widget>[
               Container(
                 child: Bubble(
-                    color: Colors.greenAccent,
+                    color: Colors.deepOrangeAccent,
                     elevation: 0,
                     padding: const BubbleEdges.all(10.0),
                     nip: BubbleNip.leftTop,
@@ -132,11 +120,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(userName);
+
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: Colors.deepPurple,
             title: Text(userName),
-            centerTitle: true,
             automaticallyImplyLeading: false,
             actions: <Widget>[
               IconButton(
@@ -145,7 +133,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     showDialog(
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
-                              title: const Text("Logging out?",
+                              title: const Text("Rate this chat",
                                   textAlign: TextAlign.center),
                               actions: <Widget>[
                                 Container(
@@ -177,44 +165,87 @@ class _ChatScreenState extends State<ChatScreen> {
                                         TextButton(
                                           onPressed: () =>
                                               {Navigator.of(context).pop()},
-                                          child: const Text('Discard'),
+                                          child: const Text('Close'),
                                         ),
                                         TextButton(
                                           onPressed: () async {
                                             // push the rating in the backend
                                             var arr = [];
                                             // get the array from the backend
+
                                             await FirebaseFirestore.instance
-                                                .collection('users')
-                                                .doc(widget.peerId)
+                                                .collection('conversations')
+                                                .doc(widget.userId +
+                                                    widget.peerId)
                                                 .get()
                                                 .then((DocumentSnapshot
                                                     documentSnapshot) {
                                               if (documentSnapshot.exists) {
+                                                setState(() {
+                                                  _peerIdToBeSentToUserInfoScreen =
+                                                      widget.userId +
+                                                          widget.peerId;
+                                                });
+
                                                 // get the data from this document snapshot
                                                 var data =
                                                     documentSnapshot.data()
                                                         as Map<String, dynamic>;
-                                                arr = data['ranks'];
-                                                // update the arr
-                                                arr.add(_rating);
 
                                                 // push this array back into user collection
                                                 FirebaseFirestore.instance
-                                                    .collection('users')
-                                                    .doc(widget.peerId)
+                                                    .collection('conversations')
+                                                    .doc(widget.userId +
+                                                        widget.peerId)
                                                     .update({
-                                                  'ranks': arr
+                                                  'rank1': _rating
                                                 }).then((value) {
                                                   print(
                                                       "rank updated successfully");
                                                   Navigator.of(context).pop();
                                                 }).catchError((error) => print(
                                                         "error in rank updation"));
+                                              } else {
+                                                FirebaseFirestore.instance
+                                                    .collection('conversations')
+                                                    .doc(widget.peerId +
+                                                        widget.userId)
+                                                    .get()
+                                                    .then((DocumentSnapshot
+                                                        documentSnapshot) {
+                                                  if (documentSnapshot.exists) {
+                                                    setState(() {
+                                                      _peerIdToBeSentToUserInfoScreen =
+                                                          widget.peerId +
+                                                              widget.userId;
+                                                    });
+
+                                                    // get the data from this document snapshot
+                                                    var data = documentSnapshot
+                                                            .data()
+                                                        as Map<String, dynamic>;
+
+                                                    // push this array back into user collection
+                                                    FirebaseFirestore.instance
+                                                        .collection(
+                                                            'conversations')
+                                                        .doc(widget.peerId +
+                                                            widget.userId)
+                                                        .update({
+                                                      'rank2': _rating
+                                                    }).then((value) {
+                                                      print(
+                                                          "rank updated successfully");
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    }).catchError((error) => print(
+                                                            "error in rank updation"));
+                                                  }
+                                                });
                                               }
                                             });
                                           },
-                                          child: const Text('Submit Rating'),
+                                          child: const Text('Rate'),
                                         ),
                                       ],
                                     ))
@@ -234,10 +265,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   icon: const Icon(Icons.info)),
             ]),
-        // body: const Center(
-        //   child: Text("hello world"),
-        // ),
-
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('conversations')
@@ -301,14 +328,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: TextField(
                     controller: textEditingController,
                     decoration: const InputDecoration(
-                        hintText: "Write message...",
+                        hintText: "Message...",
                         hintStyle: TextStyle(color: Colors.black54),
                         border: InputBorder.none),
-                    // onChanged: (val) {
-                    //   setState(() {
-                    //     _message = val;
-                    //   });
-                    // }
                   ),
                 ),
                 const SizedBox(
@@ -318,7 +340,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () async {
                     // insert the message into document
                     if (textEditingController.text != "") {
-                      print("hello");
                       await FirebaseFirestore.instance
                           .collection('conversations')
                           .doc(widget.userId + widget.peerId)
@@ -386,9 +407,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                         textEditingController.clear()
                                       });
                             } else {
-                              // userId+peerId // peerId + userId does not exist.
-                              print("nothing exists");
-
                               // create new document
                               // set foloowing data
                               Map<String, dynamic> obj =
@@ -412,19 +430,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           });
                         }
                       });
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        FireAuth.customSnackBar(
-                          content: "Please type message",
-                        ),
-                      );
                     }
-
-                    // get the array out of document
-
-                    // update the array
-
-                    // insert array into document
                   },
                   child: const Icon(
                     Icons.send,
@@ -432,7 +438,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     size: 18,
                   ),
                   backgroundColor: Colors.blue,
-                  elevation: 0,
+                  elevation: 1,
                 ),
               ],
             ),

@@ -1,11 +1,11 @@
-import 'package:fanchat_app/auth_class.dart';
-import 'package:fanchat_app/chat_screen.dart';
+import 'package:conversation_ranking_app/auth.dart';
+import 'package:conversation_ranking_app/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'all_logins.dart';
-import 'package:fanchat_app/user_search.dart';
+import 'login_page.dart';
+import 'package:conversation_ranking_app/user_search.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({Key? key}) : super(key: key);
@@ -36,7 +36,7 @@ class _DashBoardState extends State<DashBoard> {
   // create customized stream to get the user data
   final Stream<QuerySnapshot> _userStream = FirebaseFirestore.instance
       .collection('users')
-      .orderBy('createdAt')
+      // .orderBy('createdAt')
       .snapshots();
 
   bool isDataFetched = false;
@@ -51,7 +51,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => AllLogins()));
+            context, MaterialPageRoute(builder: (context) => LoginPage()));
       }
       setState(() {
         userId = user!.uid;
@@ -63,9 +63,7 @@ class _DashBoardState extends State<DashBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.deepPurple,
-          centerTitle: true,
-          title: const Text("Registered Users"),
+          title: const Text("Conversations"),
           actions: <Widget>[
             Padding(
               padding: const EdgeInsets.all(5.0),
@@ -102,7 +100,7 @@ class _DashBoardState extends State<DashBoard> {
                                   // navigate to login
                                   Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(
-                                          builder: (context) => AllLogins()));
+                                          builder: (context) => LoginPage()));
                                 },
                                 child: const Text('Yes'),
                               ),
@@ -143,7 +141,7 @@ class _DashBoardState extends State<DashBoard> {
                 children: [
                   Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: userId == document.id
+                    child: userId == data['uid']
                         ? null
                         : Card(
                             child: InkWell(
@@ -151,24 +149,33 @@ class _DashBoardState extends State<DashBoard> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => ChatScreen(
-                                    userId: userId,
-                                    peerId: document.id,
-                                  ),
+                                      userId: userId,
+                                      peerId: data['uid'],
+                                      docId: document.id),
                                 ),
                               );
                             },
                             child: ListTile(
-                              leading: CircleAvatar(
-                                  radius: 40.0,
-                                  backgroundImage:
-                                      NetworkImage(data['imageURL'])),
-                              title: Text(
-                                  data["firstName"] + " " + data["lastName"]),
-                              subtitle: Text("Joined on " +
-                                  format
-                                      .format(data['createdAt'].toDate())
-                                      .toString()),
-                            ),
+                                leading: CircleAvatar(
+                                    radius: 40.0,
+                                    backgroundImage:
+                                        NetworkImage(data['image-url'])),
+                                title: Text(data["first_name"] +
+                                    " " +
+                                    data["last_name"]),
+                                subtitle: Text("\n" +
+                                    "Joined on:  " +
+                                    DateFormat('d MMM y')
+                                        .format(new DateTime
+                                                .fromMillisecondsSinceEpoch(
+                                            data['tis']))
+                                        .toString() +
+                                    " -- " +
+                                    DateFormat('jm')
+                                        .format(new DateTime
+                                                .fromMillisecondsSinceEpoch(
+                                            data['tis']))
+                                        .toString())),
                           )),
                   ),
                 ],

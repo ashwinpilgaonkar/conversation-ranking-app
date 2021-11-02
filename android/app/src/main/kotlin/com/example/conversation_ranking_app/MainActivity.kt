@@ -1,4 +1,4 @@
-package com.example.fanchat_app
+package com.example.conversation_ranking_app
 
 import io.flutter.embedding.android.FlutterActivity
 

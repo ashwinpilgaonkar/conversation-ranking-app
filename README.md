@@ -1,4 +1,4 @@
-# fanchat_app
+# fanpage_app
 
 A new Flutter project.
 

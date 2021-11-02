@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "908770789658",
-    "project_id": "fanchatapp-8820f",
-    "storage_bucket": "fanchatapp-8820f.appspot.com"
+    "project_number": "80084127057",
+    "project_id": "conversation-ranking-app",
+    "storage_bucket": "conversation-ranking-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:908770789658:android:b501e1aa74bf26aa9784a3",
+        "mobilesdk_app_id": "1:80084127057:android:a2ede3f1f1f081661ad770",
         "android_client_info": {
-          "package_name": "com.example.fanchat_app"
+          "package_name": "com.example.conversation_ranking_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "908770789658-5k9gd6tgrdvi5r32p4uuaunn14jh89p9.apps.googleusercontent.com",
+          "client_id": "80084127057-eof0h84oitgue5qqe520bahbbvk6e3kh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.conversation_ranking_app",
+            "certificate_hash": "f1b9441089f066a682ec0543525dfd330a7319b8"
+          }
+        },
+        {
+          "client_id": "80084127057-h87v85qd48s32tih2jjj7prlo5pdpo8q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDtI5PfJyH6cepcq1no5FdVTU4eUoQAMj8"
+          "current_key": "AIzaSyCsxLUGLDZ9qQncH14-liF3hGXIjLVh81E"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "908770789658-5k9gd6tgrdvi5r32p4uuaunn14jh89p9.apps.googleusercontent.com",
+              "client_id": "80084127057-h87v85qd48s32tih2jjj7prlo5pdpo8q.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

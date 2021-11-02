@@ -15,31 +15,34 @@ class _peerInfoState extends State<peerInfo> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
-    print("xpeerId : " + widget.xpeerId);
-
     FirebaseFirestore.instance
-        .collection('users')
+        .collection('conversations')
         .doc(widget.xpeerId)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
         // get the data from this document snapshot
         var data = documentSnapshot.data() as Map<String, dynamic>;
-        print(data['ranks']);
-        var arr = data['ranks'];
-        // update the arr
-        double sum = 0;
-        for (int i = 0; i < arr.length; i++) {
-          var x = arr[i];
-          sum = sum + x;
+
+        double result = 0;
+        double r1 = 0;
+        double r2 = 0;
+
+        if (data['rank1'] != null) {
+          r1 = data['rank1'];
+        } else {
+          r1 = r2;
         }
 
-        double result = sum / arr.length;
+        if (data['rank2'] != null) {
+          r2 = data['rank2'];
+        } else {
+          r2 = r1;
+        }
 
-        print("result: ${result}");
+        result = (r1 + r2) / 2;
 
         setState(() {
           _avg_rating = result;
@@ -51,11 +54,9 @@ class _peerInfoState extends State<peerInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.deepPurple,
-          title: const Text("User Info"),
-          centerTitle: true),
-      body: Center(child: Text("Avarage Rating of this user ${_avg_rating}")),
+      appBar: AppBar(title: const Text("Rating")),
+      body: Center(
+          child: Text("The avarage rating of this chat is ${_avg_rating}")),
     );
   }
 }

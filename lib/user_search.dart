@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fanchat_app/all_logins.dart';
-import 'package:fanchat_app/chat_screen.dart';
+import 'package:conversation_ranking_app/login_page.dart';
+import 'package:conversation_ranking_app/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +41,7 @@ class _SearchUserState extends State<SearchUser> {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => AllLogins()));
+            context, MaterialPageRoute(builder: (context) => LoginPage()));
       }
       setState(() {
         userId = user!.uid;
@@ -53,8 +53,6 @@ class _SearchUserState extends State<SearchUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        centerTitle: true,
         title: const Text("Search Users"),
       ),
       body: Container(
@@ -92,7 +90,7 @@ class _SearchUserState extends State<SearchUser> {
                               // query the users buy first Name
                               FirebaseFirestore.instance
                                   .collection('users')
-                                  .where('firstName',
+                                  .where('first_name',
                                       isEqualTo: _textController.text.trim())
                                   .get()
                                   .then((QuerySnapshot querySnapshot) {
@@ -100,10 +98,11 @@ class _SearchUserState extends State<SearchUser> {
                                 querySnapshot.docs.forEach((doc) {
                                   Map<String, String> d = {};
 
-                                  d['firstName'] = doc['firstName'];
-                                  d['lastName'] = doc['lastName'];
-                                  d['imageURL'] = doc['imageURL'];
-                                  d['peerId'] = doc.id;
+                                  d['first_name'] = doc['first_name'];
+                                  d['last_name'] = doc['last_name'];
+                                  d['image-url'] = doc['image-url'];
+                                  d['peerId'] = doc['uid'];
+                                  d['docId'] = doc.id;
 
                                   arr.add(d);
 
@@ -137,9 +136,9 @@ class _SearchUserState extends State<SearchUser> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => ChatScreen(
-                                      userId: userId,
-                                      peerId: _arr[index]['peerId'],
-                                    ),
+                                        userId: userId,
+                                        peerId: _arr[index]['peerId'],
+                                        docId: _arr[index]['docId']),
                                   ),
                                 );
                               },
@@ -147,17 +146,15 @@ class _SearchUserState extends State<SearchUser> {
                                 leading: CircleAvatar(
                                     radius: 40.0,
                                     backgroundImage:
-                                        NetworkImage(_arr[index]['imageURL'])),
-                                title: Text(_arr[index]["firstName"] +
+                                        NetworkImage(_arr[index]['image-url'])),
+                                title: Text(_arr[index]["first_name"] +
                                     " " +
-                                    _arr[index]["lastName"]),
+                                    _arr[index]["last_name"]),
                               ),
                             ),
                           );
                         } else {
-                          return const ListTile(
-                            title: Text("This User already logged in"),
-                          );
+                          return Text("");
                         }
                       }),
             ),
